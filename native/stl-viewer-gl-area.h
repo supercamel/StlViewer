@@ -77,14 +77,14 @@ void stl_viewer_gl_area_clear_measurement(StlViewerGlArea *self);
 double stl_viewer_gl_area_get_measurement_distance(StlViewerGlArea *self);
 
 /**
- * stl_viewer_gl_area_get_measurement_text:
+ * stl_viewer_gl_area_get_measurement_point_count:
  * @self: a #StlViewerGlArea
  *
- * Returns a human-readable summary of the current measurement state.
+ * Returns the number of selected measurement points.
  *
- * Returns: (transfer none): current measurement text
+ * Returns: 0, 1, or 2
  */
-const char *stl_viewer_gl_area_get_measurement_text(StlViewerGlArea *self);
+int stl_viewer_gl_area_get_measurement_point_count(StlViewerGlArea *self);
 
 double stl_viewer_gl_area_get_bounds_width(StlViewerGlArea *self);
 double stl_viewer_gl_area_get_bounds_height(StlViewerGlArea *self);

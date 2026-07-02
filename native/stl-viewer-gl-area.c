@@ -47,7 +47,6 @@ struct _StlViewerGlArea {
     GArray *measure_vertices;
     char *model_path;
     char *status;
-    char *measurement_text;
     guint triangle_count;
 
     GLuint program;
@@ -918,22 +917,6 @@ append_marker(GArray *vertices, Vec3 p)
 }
 
 static void
-update_measurement_text(StlViewerGlArea *self)
-{
-    g_free(self->measurement_text);
-
-    if (!self->have_measure_a) {
-        self->measurement_text = g_strdup(self->measure_mode ?
-            "Measure: click the first point" : "Measure: inactive");
-    } else if (!self->have_measure_b) {
-        self->measurement_text = g_strdup("Measure: click the second point");
-    } else {
-        self->measurement_text = g_strdup_printf("Measure: %.4g units",
-                                                 self->measurement_distance);
-    }
-}
-
-static void
 rebuild_measure_vertices(StlViewerGlArea *self)
 {
     g_array_set_size(self->measure_vertices, 0);
@@ -1314,7 +1297,6 @@ pick_surface_point(StlViewerGlArea *self, double x, double y, Vec3 *out)
 static void
 emit_measurement_changed(StlViewerGlArea *self)
 {
-    update_measurement_text(self);
     rebuild_measure_vertices(self);
     if (gtk_widget_get_realized(GTK_WIDGET(self))) {
         gtk_gl_area_make_current(GTK_GL_AREA(self));
@@ -1413,7 +1395,6 @@ stl_viewer_gl_area_finalize(GObject *object)
     g_clear_pointer(&self->measure_vertices, g_array_unref);
     g_clear_pointer(&self->model_path, g_free);
     g_clear_pointer(&self->status, g_free);
-    g_clear_pointer(&self->measurement_text, g_free);
 
     G_OBJECT_CLASS(stl_viewer_gl_area_parent_class)->finalize(object);
 }
@@ -1460,7 +1441,6 @@ stl_viewer_gl_area_init(StlViewerGlArea *self)
     self->model_unit_scale = 1.0f;
     stl_viewer_gl_area_set_light_angles(self, 42.0, 45.0);
     set_status(self, "Open an STL file");
-    update_measurement_text(self);
 
     gtk_gl_area_set_required_version(GTK_GL_AREA(self), 3, 2);
     gtk_gl_area_set_has_depth_buffer(GTK_GL_AREA(self), TRUE);
@@ -1533,7 +1513,6 @@ stl_viewer_gl_area_load_file(StlViewerGlArea *self, const char *path)
     g_free(self->model_path);
     self->model_path = g_strdup(path);
     set_status(self, "Model loaded");
-    update_measurement_text(self);
     rebuild_edge_vertices(self);
     rebuild_measure_vertices(self);
 
@@ -1676,11 +1655,16 @@ stl_viewer_gl_area_get_measurement_distance(StlViewerGlArea *self)
     return self->have_measure_b ? self->measurement_distance : 0.0;
 }
 
-const char *
-stl_viewer_gl_area_get_measurement_text(StlViewerGlArea *self)
+int
+stl_viewer_gl_area_get_measurement_point_count(StlViewerGlArea *self)
 {
-    g_return_val_if_fail(STL_VIEWER_IS_GL_AREA(self), "");
-    return self->measurement_text != NULL ? self->measurement_text : "";
+    g_return_val_if_fail(STL_VIEWER_IS_GL_AREA(self), 0);
+
+    if (self->have_measure_b)
+        return 2;
+    if (self->have_measure_a)
+        return 1;
+    return 0;
 }
 
 double
