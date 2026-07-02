@@ -1,0 +1,13 @@
+build/
+build-linux-*/
+build-windows-*/
+dist-*/
+.sqgipkg/
+native/build/
+native/build-*/
+tmp/
+
+*.o
+*.so
+*.typelib
+*.gir

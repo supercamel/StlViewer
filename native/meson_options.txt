@@ -1,0 +1,5 @@
+option('generate_gir',
+  type: 'boolean',
+  value: true,
+  description: 'Generate GObject Introspection metadata for host-runnable builds'
+)
